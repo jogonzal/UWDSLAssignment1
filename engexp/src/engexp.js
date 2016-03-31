@@ -75,12 +75,12 @@ var EngExp = (function () {
         return this;
     };
     EngExp.prototype.beginCapture = function () {
-        // FILL IN HERE
-        return undefined;
+        this.pattern += "(";
+        return this;
     };
     EngExp.prototype.endCapture = function () {
-        // FILL IN HERE
-        return undefined;
+        this.pattern += ")";
+        return this;
     };
     EngExp.prototype.toString = function () {
         return this.asRegExp().source;

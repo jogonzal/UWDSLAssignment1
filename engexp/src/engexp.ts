@@ -88,13 +88,13 @@ export default class EngExp {
     }
 
     beginCapture(): EngExp {
-        // FILL IN HERE
-        return undefined;
+        this.pattern += "(";
+        return this;
     }
 
     endCapture(): EngExp {
-        // FILL IN HERE
-        return undefined;
+        this.pattern += ")";
+        return this;
     }
 
     toString(): string {
