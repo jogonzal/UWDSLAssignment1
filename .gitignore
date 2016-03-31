@@ -163,10 +163,6 @@ $RECYCLE.BIN/
 
 *.iml
 
-## Directory-based project format:
-.idea/
-# if you remove the above rule, at least ignore the following:
-
 # Sensitive or high-churn files:
 # .idea/dataSources.ids
 # .idea/dataSources.xml
