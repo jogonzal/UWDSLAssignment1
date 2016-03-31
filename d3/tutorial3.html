@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <title>D3 Demo: Axes</title>
+    <script type="text/javascript" src="../d3/d3.min.js"></script><style type="text/css"></style>
+    <style type="text/css">
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+
+    //Width and height
+    var w = 500;
+    var h = 300;
+    var padding = 30;
+
+    /*
+     //Static dataset
+     var dataset = [
+     [5, 20], [480, 90], [250, 50], [100, 33], [330, 95],
+     [410, 12], [475, 44], [25, 67], [85, 21], [220, 88],
+     [600, 150]
+     ];
+     */
+
+    //Dynamic, random dataset
+    var dataset = [];					//Initialize empty array
+    var numDataPoints = 50;				//Number of dummy data points to create
+    var xRange = Math.random() * 1000;	//Max range of new x values
+    var yRange = Math.random() * 1000;	//Max range of new y values
+    for (var i = 0; i < numDataPoints; i++) {					//Loop numDataPoints times
+        var newNumber1 = Math.round(Math.random() * xRange);	//New random integer
+        var newNumber2 = Math.round(Math.random() * yRange);	//New random integer
+        dataset.push([newNumber1, newNumber2]);					//Add new number to array
+    }
+
+    //Create scale functions
+    var xScale = d3.scale.linear()
+            .domain([0, d3.max(dataset, function(d) { return d[0]; })])
+            .range([padding, w - padding * 2]);
+
+    var yScale = d3.scale.linear()
+            .domain([0, d3.max(dataset, function(d) { return d[1]; })])
+            .range([h - padding, padding]);
+
+    var rScale = d3.scale.linear()
+            .domain([0, d3.max(dataset, function(d) { return d[1]; })])
+            .range([2, 5]);
+
+    //Define X axis
+    var xAxis = d3.svg.axis()
+            .scale(xScale)
+            .orient("bottom")
+            .ticks(5);
+
+    //Define Y axis
+    var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left")
+            .ticks(5);
+
+    //Create SVG element
+    var svg = d3.select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h);
+
+    //Create circles
+    svg.selectAll("circle")
+            .data(dataset)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d) {
+                return xScale(d[0]);
+            })
+            .attr("cy", function(d) {
+                return yScale(d[1]);
+            })
+            .attr("r", function(d) {
+                return rScale(d[1]);
+            });
+
+    //Create labels
+    svg.selectAll("text")
+            .data(dataset)
+            .enter()
+            .append("text")
+            .text(function(d) {
+                return d[0] + "," + d[1];
+            })
+            .attr("x", function(d) {
+                return xScale(d[0]);
+            })
+            .attr("y", function(d) {
+                return yScale(d[1]);
+            })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "11px")
+            .attr("fill", "red");
+
+    //Create X axis
+    svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + (h - padding) + ")")
+            .call(xAxis);
+
+    //Create Y axis
+    svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(" + padding + ",0)")
+            .call(yAxis);
+
+</script><svg width="500" height="300"><circle cx="92.14932126696834" cy="225.2" r="2.56"></circle><circle cx="235.46380090497738" cy="30" r="5"></circle><circle cx="405.67873303167426" cy="105.19999999999999" r="4.0600000000000005"></circle><circle cx="265.14705882352945" cy="198" r="2.9000000000000004"></circle><circle cx="427.4773755656109" cy="209.2" r="2.76"></circle><circle cx="440" cy="151.6" r="3.48"></circle><circle cx="118.12217194570137" cy="111.6" r="3.98"></circle><circle cx="381.5610859728507" cy="92.39999999999998" r="4.220000000000001"></circle><circle cx="161.2556561085973" cy="74.79999999999998" r="4.4399999999999995"></circle><circle cx="94.00452488687783" cy="105.19999999999999" r="4.0600000000000005"></circle><circle cx="316.6289592760181" cy="183.6" r="3.08"></circle><circle cx="158.93665158371041" cy="142" r="3.6"></circle><circle cx="283.2352941176471" cy="113.19999999999999" r="3.96"></circle><circle cx="194.64932126696834" cy="66.80000000000001" r="4.54"></circle><circle cx="430.72398190045254" cy="162.79999999999998" r="3.34"></circle><circle cx="160.32805429864254" cy="175.6" r="3.18"></circle><circle cx="323.1221719457014" cy="182" r="3.1"></circle><circle cx="283.6990950226244" cy="122.79999999999998" r="3.8400000000000003"></circle><circle cx="91.68552036199097" cy="257.2" r="2.16"></circle><circle cx="152.90723981900453" cy="57.19999999999999" r="4.66"></circle><circle cx="50.40723981900453" cy="105.19999999999999" r="4.0600000000000005"></circle><circle cx="171.45927601809956" cy="38" r="4.9"></circle><circle cx="358.37104072398193" cy="31.599999999999994" r="4.98"></circle><circle cx="151.5158371040724" cy="167.6" r="3.2800000000000002"></circle><circle cx="157.5452488687783" cy="30" r="5"></circle><circle cx="93.07692307692308" cy="86" r="4.300000000000001"></circle><circle cx="364.40045248868785" cy="186.8" r="3.04"></circle><circle cx="334.2533936651584" cy="161.2" r="3.3600000000000003"></circle><circle cx="100.96153846153847" cy="202.8" r="2.84"></circle><circle cx="165.89366515837105" cy="218.8" r="2.64"></circle><circle cx="48.55203619909503" cy="262" r="2.1"></circle><circle cx="270.24886877828055" cy="130.79999999999998" r="3.74"></circle><circle cx="361.6176470588236" cy="212.4" r="2.72"></circle><circle cx="311.0633484162896" cy="57.19999999999999" r="4.66"></circle><circle cx="404.2873303167421" cy="106.79999999999998" r="4.04"></circle><circle cx="138.52941176470588" cy="50.79999999999998" r="4.74"></circle><circle cx="342.60180995475116" cy="100.4" r="4.12"></circle><circle cx="141.31221719457017" cy="202.8" r="2.84"></circle><circle cx="409.8529411764706" cy="82.79999999999998" r="4.34"></circle><circle cx="236.85520361990953" cy="116.4" r="3.92"></circle><circle cx="38.34841628959276" cy="113.19999999999999" r="3.96"></circle><circle cx="96.78733031674209" cy="129.2" r="3.76"></circle><circle cx="64.3212669683258" cy="73.19999999999999" r="4.46"></circle><circle cx="330.5429864253394" cy="137.2" r="3.66"></circle><circle cx="393.6199095022625" cy="108.4" r="4.02"></circle><circle cx="348.16742081447967" cy="167.6" r="3.2800000000000002"></circle><circle cx="393.1561085972851" cy="193.2" r="2.96"></circle><circle cx="423.3031674208145" cy="31.599999999999994" r="4.98"></circle><circle cx="94.93212669683258" cy="174" r="3.2"></circle><circle cx="306.42533936651586" cy="134" r="3.7"></circle><text x="92.14932126696834" y="225.2" font-family="sans-serif" font-size="11px" fill="red">134,28</text><text x="235.46380090497738" y="30" font-family="sans-serif" font-size="11px" fill="red">443,150</text><text x="405.67873303167426" y="105.19999999999999" font-family="sans-serif" font-size="11px" fill="red">810,103</text><text x="265.14705882352945" y="198" font-family="sans-serif" font-size="11px" fill="red">507,45</text><text x="427.4773755656109" y="209.2" font-family="sans-serif" font-size="11px" fill="red">857,38</text><text x="440" y="151.6" font-family="sans-serif" font-size="11px" fill="red">884,74</text><text x="118.12217194570137" y="111.6" font-family="sans-serif" font-size="11px" fill="red">190,99</text><text x="381.5610859728507" y="92.39999999999998" font-family="sans-serif" font-size="11px" fill="red">758,111</text><text x="161.2556561085973" y="74.79999999999998" font-family="sans-serif" font-size="11px" fill="red">283,122</text><text x="94.00452488687783" y="105.19999999999999" font-family="sans-serif" font-size="11px" fill="red">138,103</text><text x="316.6289592760181" y="183.6" font-family="sans-serif" font-size="11px" fill="red">618,54</text><text x="158.93665158371041" y="142" font-family="sans-serif" font-size="11px" fill="red">278,80</text><text x="283.2352941176471" y="113.19999999999999" font-family="sans-serif" font-size="11px" fill="red">546,98</text><text x="194.64932126696834" y="66.80000000000001" font-family="sans-serif" font-size="11px" fill="red">355,127</text><text x="430.72398190045254" y="162.79999999999998" font-family="sans-serif" font-size="11px" fill="red">864,67</text><text x="160.32805429864254" y="175.6" font-family="sans-serif" font-size="11px" fill="red">281,59</text><text x="323.1221719457014" y="182" font-family="sans-serif" font-size="11px" fill="red">632,55</text><text x="283.6990950226244" y="122.79999999999998" font-family="sans-serif" font-size="11px" fill="red">547,92</text><text x="91.68552036199097" y="257.2" font-family="sans-serif" font-size="11px" fill="red">133,8</text><text x="152.90723981900453" y="57.19999999999999" font-family="sans-serif" font-size="11px" fill="red">265,133</text><text x="50.40723981900453" y="105.19999999999999" font-family="sans-serif" font-size="11px" fill="red">44,103</text><text x="171.45927601809956" y="38" font-family="sans-serif" font-size="11px" fill="red">305,145</text><text x="358.37104072398193" y="31.599999999999994" font-family="sans-serif" font-size="11px" fill="red">708,149</text><text x="151.5158371040724" y="167.6" font-family="sans-serif" font-size="11px" fill="red">262,64</text><text x="157.5452488687783" y="30" font-family="sans-serif" font-size="11px" fill="red">275,150</text><text x="93.07692307692308" y="86" font-family="sans-serif" font-size="11px" fill="red">136,115</text><text x="364.40045248868785" y="186.8" font-family="sans-serif" font-size="11px" fill="red">721,52</text><text x="334.2533936651584" y="161.2" font-family="sans-serif" font-size="11px" fill="red">656,68</text><text x="100.96153846153847" y="202.8" font-family="sans-serif" font-size="11px" fill="red">153,42</text><text x="165.89366515837105" y="218.8" font-family="sans-serif" font-size="11px" fill="red">293,32</text><text x="48.55203619909503" y="262" font-family="sans-serif" font-size="11px" fill="red">40,5</text><text x="270.24886877828055" y="130.79999999999998" font-family="sans-serif" font-size="11px" fill="red">518,87</text><text x="361.6176470588236" y="212.4" font-family="sans-serif" font-size="11px" fill="red">715,36</text><text x="311.0633484162896" y="57.19999999999999" font-family="sans-serif" font-size="11px" fill="red">606,133</text><text x="404.2873303167421" y="106.79999999999998" font-family="sans-serif" font-size="11px" fill="red">807,102</text><text x="138.52941176470588" y="50.79999999999998" font-family="sans-serif" font-size="11px" fill="red">234,137</text><text x="342.60180995475116" y="100.4" font-family="sans-serif" font-size="11px" fill="red">674,106</text><text x="141.31221719457017" y="202.8" font-family="sans-serif" font-size="11px" fill="red">240,42</text><text x="409.8529411764706" y="82.79999999999998" font-family="sans-serif" font-size="11px" fill="red">819,117</text><text x="236.85520361990953" y="116.4" font-family="sans-serif" font-size="11px" fill="red">446,96</text><text x="38.34841628959276" y="113.19999999999999" font-family="sans-serif" font-size="11px" fill="red">18,98</text><text x="96.78733031674209" y="129.2" font-family="sans-serif" font-size="11px" fill="red">144,88</text><text x="64.3212669683258" y="73.19999999999999" font-family="sans-serif" font-size="11px" fill="red">74,123</text><text x="330.5429864253394" y="137.2" font-family="sans-serif" font-size="11px" fill="red">648,83</text><text x="393.6199095022625" y="108.4" font-family="sans-serif" font-size="11px" fill="red">784,101</text><text x="348.16742081447967" y="167.6" font-family="sans-serif" font-size="11px" fill="red">686,64</text><text x="393.1561085972851" y="193.2" font-family="sans-serif" font-size="11px" fill="red">783,48</text><text x="423.3031674208145" y="31.599999999999994" font-family="sans-serif" font-size="11px" fill="red">848,149</text><text x="94.93212669683258" y="174" font-family="sans-serif" font-size="11px" fill="red">140,60</text><text x="306.42533936651586" y="134" font-family="sans-serif" font-size="11px" fill="red">596,85</text><g class="axis" transform="translate(0,270)"><g transform="translate(30,0)" style="opacity: 1;"><line class="tick" y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">0</text></g><g transform="translate(122.76018099547512,0)" style="opacity: 1;"><line class="tick" y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">200</text></g><g transform="translate(215.52036199095025,0)" style="opacity: 1;"><line class="tick" y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">400</text></g><g transform="translate(308.28054298642536,0)" style="opacity: 1;"><line class="tick" y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">600</text></g><g transform="translate(401.0407239819005,0)" style="opacity: 1;"><line class="tick" y2="6" x2="0"></line><text y="9" x="0" dy=".71em" style="text-anchor: middle;">800</text></g><path class="domain" d="M30,6V0H440V6"></path></g><g class="axis" transform="translate(30,0)"><g transform="translate(0,270)" style="opacity: 1;"><line class="tick" x2="-6" y2="0"></line><text x="-9" y="0" dy=".32em" style="text-anchor: end;">0</text></g><g transform="translate(0,190)" style="opacity: 1;"><line class="tick" x2="-6" y2="0"></line><text x="-9" y="0" dy=".32em" style="text-anchor: end;">50</text></g><g transform="translate(0,109.99999999999997)" style="opacity: 1;"><line class="tick" x2="-6" y2="0"></line><text x="-9" y="0" dy=".32em" style="text-anchor: end;">100</text></g><g transform="translate(0,30)" style="opacity: 1;"><line class="tick" x2="-6" y2="0"></line><text x="-9" y="0" dy=".32em" style="text-anchor: end;">150</text></g><path class="domain" d="M-6,30H0V270H-6"></path></g></svg>
+
+</body></html>
