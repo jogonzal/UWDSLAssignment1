@@ -71,8 +71,8 @@ var EngExp = (function () {
         return this;
     };
     EngExp.prototype.or = function (pattern) {
-        // FILL IN HERE
-        return undefined;
+        this.pattern += "|(?:" + EngExp.sanitize(pattern) + ")";
+        return this;
     };
     EngExp.prototype.beginCapture = function () {
         // FILL IN HERE

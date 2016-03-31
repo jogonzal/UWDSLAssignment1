@@ -83,8 +83,8 @@ export default class EngExp {
     }
 
     or(pattern: string | EngExp): EngExp {
-        // FILL IN HERE
-        return undefined;
+        this.pattern += `|(?:${EngExp.sanitize(pattern)})`;
+        return this;
     }
 
     beginCapture(): EngExp {
