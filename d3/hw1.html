@@ -3,6 +3,7 @@
     <meta charset="utf-8">
     <title>D3 Demo: Axes</title>
     <script type="text/javascript" src="d3/d3.min.js"></script>
+    <script type="text/javascript" src="underscore.js"></script>
     <script type="text/javascript" src="data.js"></script>
     <style type="text/css">
 
@@ -21,84 +22,133 @@
     </style>
 </head>
 <body>
+    <div>
+        <select id="paradigmsId">
+
+        </select>
+    </div>
+    <svg id="svg">
+
+    </svg>
 <script type="text/javascript">
 
-    // Width and height
-    var w = 500;
-    var h = 300;
-    var padding = 30;
+    function populateD3(){
 
-    //Create scale functions
-    var xScale = d3.scale.linear()
-            .domain([d3.min(dataset, function(d) { return d.year; }), d3.max(dataset, function(d) { return d.year; })])
-            .range([padding, w - padding * 2]);
+        var paradigmsDomElement = document.getElementById("paradigmsId")
 
-    var yScale = d3.scale.linear()
-            .domain([d3.min(dataset, function(d) { return d.nbRepos; }), d3.max(dataset, function(d) { return d.nbRepos; })])
-            .range([h - padding, padding]);
+        var opt = paradigmsDomElement.options[paradigmsDomElement.selectedIndex];
 
-    //Define X axis
-    var xAxis = d3.svg.axis()
-            .scale(xScale)
-            .orient("bottom")
-            .ticks(5);
+        var filteredDataset = _.filter(dataset, function(element){
+            return _.contains(element.paradigms, opt.text);
+        });
 
-    //Define Y axis
-    var yAxis = d3.svg.axis()
-            .scale(yScale)
-            .orient("left")
-            .ticks(5);
+        // Width and height
+        var w = 800;
+        var h = 600;
+        var padding = 50;
 
-    //Create SVG element
-    var svg = d3.select("body")
-            .append("svg")
-            .attr("width", w)
-            .attr("height", h);
+        // Create scale functions
+        var xScale = d3.scale.linear()
+                .domain([d3.min(filteredDataset, function(d) { return d.year; }), d3.max(filteredDataset, function(d) { return d.year; })])
+                .range([padding, w - padding * 2]);
 
-    //Create circles
-    svg.selectAll("circle")
-            .data(dataset)
-            .enter()
-            .append("circle")
-            .attr("cx", function(d) {
-                return xScale(d.year);
-            })
-            .attr("cy", function(d) {
-                return yScale(d.nbRepos);
-            })
-            .attr("r", function(d) {
-                return "5";
-            });
+        var yScale = d3.scale.linear()
+                .domain([d3.min(filteredDataset, function(d) { return d.nbRepos; }), d3.max(filteredDataset, function(d) { return d.nbRepos; })])
+                .range([h - padding, padding]);
 
-    //Create labels
-    svg.selectAll("text")
-            .data(dataset)
-            .enter()
-            .append("text")
-            .text(function(d) {
-                return d.name;
-            })
-            .attr("x", function(d) {
-                return xScale(d.year);
-            })
-            .attr("y", function(d) {
-                return yScale(d.nbRepos);
-            })
-            .attr("font-family", "sans-serif")
-            .attr("font-size", "11px")
-            .attr("fill", "red");
+        //Define X axis
+        var xAxis = d3.svg.axis()
+                .scale(xScale)
+                .orient("bottom")
+                .ticks(5);
 
-    //Create X axis
-    svg.append("g")
-            .attr("class", "axis")
-            .attr("transform", "translate(0," + (h - padding) + ")")
-            .call(xAxis);
+        //Define Y axis
+        var yAxis = d3.svg.axis()
+                .scale(yScale)
+                .orient("left")
+                .ticks(5);
 
-    //Create Y axis
-    svg.append("g")
-            .attr("class", "axis")
-            .attr("transform", "translate(" + padding + ",0)")
-            .call(yAxis);
+        //Create SVG element
+        var svg = d3.select("body")
+                .select("#svg")
+                .attr("width", w)
+                .attr("height", h);
+
+        //Create circles
+        var circleSelection = svg.selectAll("circle")
+                .data(filteredDataset);
+
+        circleSelection.enter()
+                .append("circle")
+                .attr("cx", function(d) {
+                    return xScale(d.year);
+                })
+                .attr("cy", function(d) {
+                    return yScale(d.nbRepos);
+                })
+                .attr("r", function(d) {
+                    return "5";
+                });
+
+        circleSelection.exit().remove();
+
+        //Create labels
+        var textSelection = svg.selectAll("text")
+                .data(filteredDataset);
+
+        textSelection.enter()
+                .append("text")
+                .text(function(d) {
+                    return d.name;
+                })
+                .attr("x", function(d) {
+                    return xScale(d.year);
+                })
+                .attr("y", function(d) {
+                    return yScale(d.nbRepos);
+                })
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "11px")
+                .attr("fill", "red");
+
+        textSelection.exit().remove();
+
+        svg.selectAll(".axis").remove();
+
+        //Create X axis
+        svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(0," + (h - padding) + ")")
+                .call(xAxis);
+
+        //Create Y axis
+        svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(" + padding + ",0)")
+                .call(yAxis);
+    }
+
+    // Populate options - this will only run once
+    elements = [];
+    for(var i = 0; i < dataset.length; i++){
+        for(var k = 0; k < dataset[i].paradigms.length; k++){
+            var paradigm = dataset[i].paradigms[k];
+            elements.push(paradigm);
+        }
+    }
+    var paradigms = _.uniq(elements);
+    var paradigmsDomElement = document.getElementById("paradigmsId")
+    for(var i = 0; i < paradigms.length; i++){
+        var option = document.createElement("option");
+        option.innerHTML = paradigms[i];
+        paradigmsDomElement.appendChild(option);
+    }
+
+    paradigmsDomElement.onchange = function(){
+        populateD3();
+    };
+
+    populateD3();
 
 </script>
 </body>
