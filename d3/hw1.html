@@ -121,65 +121,79 @@
                     .call(yAxis);
         }
 
-
         //Create labels
         var textSelection = svg.selectAll(".labeltext")
-                .data(filteredDataset, function(d){return d.name;})
-                .attr("x", function(d) {
-                    var value = xScale(d.year);
-                    return value;
-                })
-                .attr("y", function(d) {
-                    var value = yScale(d.nbRepos);
-                    return value;
-                });
-        textSelection.enter()
-                .append("text")
-                .attr("class", "labeltext")
-                .text(function(d) {
-                    return d.name;
-                })
-                .attr("x", function(d) {
-                    var value = xScale(d.year);
-                    return value;
-                })
-                .attr("y", function(d) {
-                    var value = yScale(d.nbRepos);
-                    return value;
-                })
-                .attr("font-family", "sans-serif")
-                .attr("font-size", "11px")
-                .attr("fill", "red");
-        textSelection.transition().duration(500).ease("sin-in-out");
-
-        textSelection.exit().remove();
+                .data(filteredDataset, function(d){return d.name;});
 
         //Create circles
         var circleSelection = svg.selectAll("circle")
-                .data(filteredDataset, function(d){return d.name;})
-                .attr("cx", function(d) {
-                    var value = xScale(d.year);
-                    return value;
-                })
-                .attr("cy", function(d) {
-                    var value = yScale(d.nbRepos);
-                    return value;
-                });
-        circleSelection.exit().remove();
-        circleSelection.enter()
-                .append("circle")
-                .attr("class", "labelCircle")
-                .attr("cx", function(d) {
-                    var value = xScale(d.year);
-                    return value;
-                })
-                .attr("cy", function(d) {
-                    var value = yScale(d.nbRepos);
-                    return value;
-                })
-                .attr("r", function(d) {
-                    return "5";
-                });
+                .data(filteredDataset, function(d){return d.name;});
+
+        d3.transition().ease("sin-in-out").duration(500).each(function() {
+            textSelection.exit().style('opacity', 1).transition().style('opacity', 0).remove();
+            circleSelection.exit().style('opacity', 1).transition().style('opacity', 0).remove();
+        });
+
+        d3.transition().delay(500).ease("sin-in-out").duration(500).each(function() {
+            textSelection.transition()
+                    .attr("x", function(d) {
+                        var value = xScale(d.year);
+                        return value;
+                    })
+                    .attr("y", function(d) {
+                        var value = yScale(d.nbRepos);
+                        return value;
+                    });
+            circleSelection.transition().attr("cx", function(d) {
+                        var value = xScale(d.year);
+                        return value;
+                    })
+                    .attr("cy", function(d) {
+                        var value = yScale(d.nbRepos);
+                        return value;
+                    });
+        });
+
+        d3.transition().delay(1000).ease("sin-in-out").duration(500).each(function() {
+            textSelection.enter()
+                    .append("text")
+                    .attr("class", "labeltext")
+                    .text(function(d) {
+                        return d.name;
+                    })
+                    .attr("x", function(d) {
+                        var value = xScale(d.year);
+                        return value;
+                    })
+                    .attr("y", function(d) {
+                        var value = yScale(d.nbRepos);
+                        return value;
+                    })
+                    .attr("font-family", "sans-serif")
+                    .attr("font-size", "11px")
+                    .attr("fill", "red")
+                    .style('opacity', 0)
+                    .transition()
+                    .style('opacity', 1);
+
+            circleSelection.enter()
+                    .append("circle")
+                    .attr("class", "labelCircle")
+                    .attr("cx", function(d) {
+                        var value = xScale(d.year);
+                        return value;
+                    })
+                    .attr("cy", function(d) {
+                        var value = yScale(d.nbRepos);
+                        return value;
+                    })
+                    .attr("r", function(d) {
+                        return "5";
+                    })
+                    .style('opacity', 0)
+                    .transition()
+                    .style('opacity', 1);
+        });
     }
 
     // Populate options - this will only run once
