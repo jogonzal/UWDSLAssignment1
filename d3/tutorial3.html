@@ -20,6 +20,7 @@
     </style>
 </head>
 <body>
+<button onclick="rescale();">Rescale</button>
 <script type="text/javascript">
 
     //Width and height
@@ -48,11 +49,11 @@
     }
 
     //Create scale functions
-    var xScale = d3.scale.linear()
+    xScale = d3.scale.linear()
             .domain([0, d3.max(dataset, function(d) { return d[0]; })])
             .range([padding, w - padding * 2]);
 
-    var yScale = d3.scale.linear()
+    yScale = d3.scale.linear()
             .domain([0, d3.max(dataset, function(d) { return d[1]; })])
             .range([h - padding, padding]);
 
@@ -61,19 +62,19 @@
             .range([2, 5]);
 
     //Define X axis
-    var xAxis = d3.svg.axis()
+    xAxis = d3.svg.axis()
             .scale(xScale)
             .orient("bottom")
             .ticks(5);
 
     //Define Y axis
-    var yAxis = d3.svg.axis()
+    yAxis = d3.svg.axis()
             .scale(yScale)
             .orient("left")
             .ticks(5);
 
     //Create SVG element
-    var svg = d3.select("body")
+    svg = d3.select("body")
             .append("svg")
             .attr("width", w)
             .attr("height", h);
@@ -113,15 +114,28 @@
 
     //Create X axis
     svg.append("g")
-            .attr("class", "axis")
+            .attr("class", "xaxis")
             .attr("transform", "translate(0," + (h - padding) + ")")
             .call(xAxis);
 
     //Create Y axis
     svg.append("g")
-            .attr("class", "axis")
+            .attr("class", "yaxis")
             .attr("transform", "translate(" + padding + ",0)")
             .call(yAxis);
 
+    function rescale(){
+        xScale.domain([0, 100])  // change scale to 0, to between 10 and 100
+        svg.select(".xaxis")
+                .transition().duration(1500).ease("sin-in-out")  // https://github.com/mbostock/d3/wiki/Transitions#wiki-d3_ease
+                .call(xAxis);
+
+        yScale.domain([0, 200])  // change scale to 0, to between 10 and 100
+        svg.select(".yaxis")
+                .transition().duration(1500).ease("sin-in-out")  // https://github.com/mbostock/d3/wiki/Transitions#wiki-d3_ease
+                .call(yAxis);
+    }
+
 </script>
+
 </body></html>
