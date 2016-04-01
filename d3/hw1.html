@@ -57,39 +57,51 @@
     }
 
     function joinFunction(sel1, sel2, pred){
+        sel1 = sel1[0];
+        sel2 = sel2[0];
         var finalList = [];
         for(var i = 0; i < sel1.length; i++){
             var n = sel1[i];
             for(var k = 0; k < sel2.length; k++){
                 var m = sel2[k];
-                if (pred(n, m)){
+                if (pred(d3.select(n), d3.select(m))){
                     finalList.push(n);
                     break;
                 }
             }
         }
-        return finalList;
+        return d3.selectAll(finalList);
     }
 
     d3.selection.prototype.join = function(sel2, pred) {
         var sel1 = this;
-        return joinFunction(sel1, sel2, sel3);
+        return joinFunction(sel1, sel2, pred);
     }
 
     function RunTests(){
-        var results = "";
-        var sel1 = [1, 2, 3, 4, 5, 6, 7, 8, 1];
-        var sel2 = [7, 8];
-        var join  = joinFunction(sel1, sel2, function(x, y){
-            return (x + y) == 9
-        });
-        if (join.length == 3 && join[0] == 1 && join[1] == 2 && join[2] == 1){
-            results += "Pass on joinFunction<br>";
-        } else {
-            results += "Fail on joinFunction<br>";
-        }
-        var resultsDiv = document.getElementById("resultsDiv");
-        resultsDiv.innerHTML = results;
+
+        // test code for join
+        var test = d3.select("body")
+                .append("div")
+                .attr("class", "test");
+
+        var sel2 = test.selectAll(".sel2")
+                .data([3, 4, 5])
+                .enter()
+                .append("div")
+                .attr("class", "sel2")
+                .attr("foo", function(d) { return d });
+
+        test.selectAll(".sel1")
+                .data([1, 2, 3])
+                .enter()
+                .append("div")
+                .attr("class", "sel1")
+                .attr("foo", function(d) { return d })
+                .join(sel2, function(n, m) {
+                    return n.attr("foo") == m.attr("foo");
+                })
+                .text("This is also in sel2!");
     }
 
     RunTests();
