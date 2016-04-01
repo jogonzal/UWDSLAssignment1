@@ -32,6 +32,8 @@
     </svg>
 <script type="text/javascript">
 
+    var axisCreated = false;
+
     function populateD3(){
 
         var paradigmsDomElement = document.getElementById("paradigmsId")
@@ -42,18 +44,29 @@
             return _.contains(element.paradigms, opt.text);
         });
 
+        var dictionary = _.object(_.map(filteredDataset, function(d) {
+            return [d.name, d]
+        }));
+
+        var uniqueList = _.map(filteredDataset, function(d) { return d.name });
+
         // Width and height
         var w = 800;
         var h = 600;
         var padding = 50;
 
+        var yearmin = d3.min(filteredDataset, function(d) { return d.year; });
+        var yearmax = d3.max(filteredDataset, function(d) { return d.year; });
         // Create scale functions
         var xScale = d3.scale.linear()
-                .domain([d3.min(filteredDataset, function(d) { return d.year; }), d3.max(filteredDataset, function(d) { return d.year; })])
+                .domain([yearmin, yearmax])
                 .range([padding, w - padding * 2]);
 
+        var nbReposMin = d3.min(filteredDataset, function(d) { return d.nbRepos; });
+        var nbReposMax = d3.max(filteredDataset, function(d) { return d.nbRepos; });
+
         var yScale = d3.scale.linear()
-                .domain([d3.min(filteredDataset, function(d) { return d.nbRepos; }), d3.max(filteredDataset, function(d) { return d.nbRepos; })])
+                .domain([nbReposMin, nbReposMax])
                 .range([h - padding, padding]);
 
         //Define X axis
@@ -74,58 +87,62 @@
                 .attr("width", w)
                 .attr("height", h);
 
-        //Create circles
-        var circleSelection = svg.selectAll("circle")
-                .data(filteredDataset);
-
-        circleSelection.enter()
-                .append("circle")
-                .attr("cx", function(d) {
-                    return xScale(d.year);
-                })
-                .attr("cy", function(d) {
-                    return yScale(d.nbRepos);
-                })
-                .attr("r", function(d) {
-                    return "5";
-                });
-
-        circleSelection.exit().remove();
-
         //Create labels
         var textSelection = svg.selectAll("text")
-                .data(filteredDataset);
-
+                .data(uniqueList);
+        textSelection.exit().remove();
         textSelection.enter()
                 .append("text")
                 .text(function(d) {
-                    return d.name;
+                    return d;
                 })
                 .attr("x", function(d) {
-                    return xScale(d.year);
+                    return xScale(dictionary[d].year);
                 })
                 .attr("y", function(d) {
-                    return yScale(d.nbRepos);
+                    return yScale(dictionary[d].nbRepos);
                 })
                 .attr("font-family", "sans-serif")
                 .attr("font-size", "11px")
                 .attr("fill", "red");
 
-        textSelection.exit().remove();
+        //Create circles
+        var circleSelection = svg.selectAll("circle")
+                .data(uniqueList);
+        circleSelection.exit().remove();
+        circleSelection.enter()
+                .append("circle")
+                .attr("cx", function(d) {
+                    return xScale(dictionary[d].year);
+                })
+                .attr("cy", function(d) {
+                    return yScale(dictionary[d].nbRepos);
+                })
+                .attr("r", function(d) {
+                    return "5";
+                });
 
-        svg.selectAll(".axis").remove();
+        if (!axisCreated){
+            //Create X axis
+            svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + (h - padding) + ")")
+                    .call(xAxis);
 
-        //Create X axis
-        svg.append("g")
-                .attr("class", "axis")
-                .attr("transform", "translate(0," + (h - padding) + ")")
-                .call(xAxis);
+            //Create Y axis
+            svg.append("g")
+                    .attr("class", "y axis")
+                    .attr("transform", "translate(" + padding + ",0)")
+                    .call(yAxis);
 
-        //Create Y axis
-        svg.append("g")
-                .attr("class", "axis")
-                .attr("transform", "translate(" + padding + ",0)")
-                .call(yAxis);
+            axisCreated = true;
+        } else {
+            svg.selectAll("g.y.axis")
+                    .call(yAxis)
+
+            svg.selectAll("g.x.axis")
+                    .call(xAxis);
+        }
     }
 
     // Populate options - this will only run once
