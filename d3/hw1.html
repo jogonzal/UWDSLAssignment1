@@ -32,7 +32,7 @@
     </svg>
 <script type="text/javascript">
 
-    var axisCreated = false;
+    var svg, xScale, yScale, xAxis, yAxis;
 
     function populateD3(){
 
@@ -44,105 +44,142 @@
             return _.contains(element.paradigms, opt.text);
         });
 
-        var dictionary = _.object(_.map(filteredDataset, function(d) {
-            return [d.name, d]
-        }));
-
-        var uniqueList = _.map(filteredDataset, function(d) { return d.name });
-
         // Width and height
-        var w = 800;
+        var w = 1200;
         var h = 600;
-        var padding = 50;
+        var padding = 60;
 
         var yearmin = d3.min(filteredDataset, function(d) { return d.year; });
         var yearmax = d3.max(filteredDataset, function(d) { return d.year; });
-        // Create scale functions
-        var xScale = d3.scale.linear()
-                .domain([yearmin, yearmax])
-                .range([padding, w - padding * 2]);
+
+        if (yearmin == yearmax){
+            yearmax += 5;
+        }
 
         var nbReposMin = d3.min(filteredDataset, function(d) { return d.nbRepos; });
         var nbReposMax = d3.max(filteredDataset, function(d) { return d.nbRepos; });
 
-        var yScale = d3.scale.linear()
-                .domain([nbReposMin, nbReposMax])
-                .range([h - padding, padding]);
+        if (nbReposMin == nbReposMax){
+            nbReposMax += 5;
+        }
 
-        //Define X axis
-        var xAxis = d3.svg.axis()
-                .scale(xScale)
-                .orient("bottom")
-                .ticks(5);
+        //Select SVG element
+        if (svg == null){
+            svg = d3.select("body")
+                    .select("#svg")
+                    .attr("width", w)
+                    .attr("height", h);
+        }
 
-        //Define Y axis
-        var yAxis = d3.svg.axis()
-                .scale(yScale)
-                .orient("left")
-                .ticks(5);
+        // Create scale functions
+        if (xScale == null){
+            xScale = d3.scale.linear()
+                    .domain([yearmin, yearmax])
+                    .range([padding, w - padding * 2]);
 
-        //Create SVG element
-        var svg = d3.select("body")
-                .select("#svg")
-                .attr("width", w)
-                .attr("height", h);
+            //Define X axis
+            xAxis = d3.svg.axis()
+                    .scale(xScale)
+                    .orient("bottom")
+                    .ticks(5);
+
+            //Create X axis
+            svg.append("g")
+                    .attr("class", "xaxis")
+                    .attr("transform", "translate(0," + (h - padding) + ")")
+                    .call(xAxis);
+        } else {
+            xScale.domain([yearmin, yearmax])
+                    .range([padding, w - padding * 2]);
+
+            svg.select(".xaxis")
+                    .transition().duration(500).ease("sin-in-out")
+                    .call(xAxis);
+        }
+
+        if (yScale == null){
+            yScale = d3.scale.linear()
+                    .domain([nbReposMin, nbReposMax])
+                    .range([h - padding, padding]);
+
+            //Define Y axis
+            yAxis = d3.svg.axis()
+                    .scale(yScale)
+                    .orient("left")
+                    .ticks(5);
+
+            //Create Y axis
+            svg.append("g")
+                    .attr("class", "yaxis")
+                    .attr("transform", "translate(" + padding + ",0)")
+                    .call(yAxis);
+        } else {
+            yScale.domain([nbReposMin, nbReposMax])
+                    .range([h - padding, padding]);
+            svg.select(".yaxis")
+                    .transition().duration(500).ease("sin-in-out")
+                    .call(yAxis);
+        }
+
 
         //Create labels
-        var textSelection = svg.selectAll("text")
-                .data(uniqueList);
-        textSelection.exit().remove();
-        textSelection.enter()
-                .append("text")
-                .text(function(d) {
-                    return d;
-                })
+        var textSelection = svg.selectAll(".labeltext")
+                .data(filteredDataset, function(d){return d.name;})
                 .attr("x", function(d) {
-                    return xScale(dictionary[d].year);
+                    var value = xScale(d.year);
+                    return value;
                 })
                 .attr("y", function(d) {
-                    return yScale(dictionary[d].nbRepos);
+                    var value = yScale(d.nbRepos);
+                    return value;
+                });
+        textSelection.enter()
+                .append("text")
+                .attr("class", "labeltext")
+                .text(function(d) {
+                    return d.name;
+                })
+                .attr("x", function(d) {
+                    var value = xScale(d.year);
+                    return value;
+                })
+                .attr("y", function(d) {
+                    var value = yScale(d.nbRepos);
+                    return value;
                 })
                 .attr("font-family", "sans-serif")
                 .attr("font-size", "11px")
                 .attr("fill", "red");
+        textSelection.transition().duration(500).ease("sin-in-out");
+
+        textSelection.exit().remove();
 
         //Create circles
         var circleSelection = svg.selectAll("circle")
-                .data(uniqueList);
+                .data(filteredDataset, function(d){return d.name;})
+                .attr("cx", function(d) {
+                    var value = xScale(d.year);
+                    return value;
+                })
+                .attr("cy", function(d) {
+                    var value = yScale(d.nbRepos);
+                    return value;
+                });
         circleSelection.exit().remove();
         circleSelection.enter()
                 .append("circle")
+                .attr("class", "labelCircle")
                 .attr("cx", function(d) {
-                    return xScale(dictionary[d].year);
+                    var value = xScale(d.year);
+                    return value;
                 })
                 .attr("cy", function(d) {
-                    return yScale(dictionary[d].nbRepos);
+                    var value = yScale(d.nbRepos);
+                    return value;
                 })
                 .attr("r", function(d) {
                     return "5";
                 });
-
-        if (!axisCreated){
-            //Create X axis
-            svg.append("g")
-                    .attr("class", "x axis")
-                    .attr("transform", "translate(0," + (h - padding) + ")")
-                    .call(xAxis);
-
-            //Create Y axis
-            svg.append("g")
-                    .attr("class", "y axis")
-                    .attr("transform", "translate(" + padding + ",0)")
-                    .call(yAxis);
-
-            axisCreated = true;
-        } else {
-            svg.selectAll("g.y.axis")
-                    .call(yAxis)
-
-            svg.selectAll("g.x.axis")
-                    .call(xAxis);
-        }
     }
 
     // Populate options - this will only run once
