@@ -26,6 +26,8 @@
         <select id="paradigmsId">
 
         </select>
+        <button onclick="checkForIntersections();">Check for intersections</button>
+        <p>(We'll paint circles that collide with text or are out of bounds blue)</p>
     </div>
     <svg id="svg">
 
@@ -78,6 +80,11 @@
         return joinFunction(sel1, sel2, pred);
     }
 
+    function checkForIntersections(){
+        var intersections = d3.selectAll("circle").join(d3.selectAll(".labeltext"), elementsOverlap).each(logOverlappingCircle);
+        intersections.style("fill", "blue");
+    }
+
     function RunTests(){
 
         // test code for join
@@ -122,6 +129,8 @@
         var w = 1200;
         var h = 600;
         var padding = 60;
+        var textVerticalOffset = 9;
+        var textHorizontalOffset = 8;
 
         var yearmin = d3.min(filteredDataset, function(d) { return d.year; });
         var yearmax = d3.max(filteredDataset, function(d) { return d.year; });
@@ -212,11 +221,11 @@
             textSelection.transition()
                     .attr("x", function(d) {
                         var value = xScale(d.year);
-                        return value + 7;
+                        return value + textVerticalOffset;
                     })
                     .attr("y", function(d) {
                         var value = yScale(d.nbRepos);
-                        return value + 5;
+                        return value + textHorizontalOffset;
                     });
             circleSelection.transition().attr("cx", function(d) {
                         var value = xScale(d.year);
@@ -237,14 +246,14 @@
                     })
                     .attr("x", function(d) {
                         var value = xScale(d.year);
-                        return value + 7;
+                        return value + textVerticalOffset;
                     })
                     .attr("y", function(d) {
                         var value = yScale(d.nbRepos);
-                        return value + 5;
+                        return value + textHorizontalOffset;
                     })
                     .attr("font-family", "sans-serif")
-                    .attr("font-size", "13px")
+                    .attr("font-size", "18px")
                     .attr("fill", "red")
                     .style('opacity', 0)
                     .transition()
