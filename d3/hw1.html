@@ -30,7 +30,69 @@
     <svg id="svg">
 
     </svg>
+
+    <div id="resultsDiv">
+
+    </div>
 <script type="text/javascript">
+
+    function elementsOverlap(sel1, sel2) {
+        // bounding rectangles
+        var r1 = sel1.node().getBoundingClientRect();
+        var r2 = sel2.node().getBoundingClientRect();
+
+        // http://stackoverflow.com/a/2752369
+        return (r1.left <= r2.right &&  r2.left <= r1.right &&
+        r1.top <= r2.bottom && r2.top <= r1.bottom);
+    }
+
+    // log circles
+    function logOverlappingCircle(d) {
+        var cr = this.getBoundingClientRect();
+
+        console.log(
+                "Circle in (%d, %d, %d, %d) is obscured",
+                cr.left, cr.right, cr.top, cr.bottom
+        );
+    }
+
+    function joinFunction(sel1, sel2, pred){
+        var finalList = [];
+        for(var i = 0; i < sel1.length; i++){
+            var n = sel1[i];
+            for(var k = 0; k < sel2.length; k++){
+                var m = sel2[k];
+                if (pred(n, m)){
+                    finalList.push(n);
+                    break;
+                }
+            }
+        }
+        return finalList;
+    }
+
+    d3.selection.prototype.join = function(sel2, pred) {
+        var sel1 = this;
+        return joinFunction(sel1, sel2, sel3);
+    }
+
+    function RunTests(){
+        var results = "";
+        var sel1 = [1, 2, 3, 4, 5, 6, 7, 8, 1];
+        var sel2 = [7, 8];
+        var join  = joinFunction(sel1, sel2, function(x, y){
+            return (x + y) == 9
+        });
+        if (join.length == 3 && join[0] == 1 && join[1] == 2 && join[2] == 1){
+            results += "Pass on joinFunction<br>";
+        } else {
+            results += "Fail on joinFunction<br>";
+        }
+        var resultsDiv = document.getElementById("resultsDiv");
+        resultsDiv.innerHTML = results;
+    }
+
+    RunTests();
 
     var svg, xScale, yScale, xAxis, yAxis;
 
@@ -98,7 +160,7 @@
         }
 
         if (yScale == null){
-            yScale = d3.scale.linear()
+            yScale = d3.scale.log()
                     .domain([nbReposMin, nbReposMax])
                     .range([h - padding, padding]);
 
@@ -138,11 +200,11 @@
             textSelection.transition()
                     .attr("x", function(d) {
                         var value = xScale(d.year);
-                        return value;
+                        return value + 7;
                     })
                     .attr("y", function(d) {
                         var value = yScale(d.nbRepos);
-                        return value;
+                        return value + 5;
                     });
             circleSelection.transition().attr("cx", function(d) {
                         var value = xScale(d.year);
@@ -163,14 +225,14 @@
                     })
                     .attr("x", function(d) {
                         var value = xScale(d.year);
-                        return value;
+                        return value + 7;
                     })
                     .attr("y", function(d) {
                         var value = yScale(d.nbRepos);
-                        return value;
+                        return value + 5;
                     })
                     .attr("font-family", "sans-serif")
-                    .attr("font-size", "11px")
+                    .attr("font-size", "13px")
                     .attr("fill", "red")
                     .style('opacity', 0)
                     .transition()
