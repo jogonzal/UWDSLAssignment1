@@ -26,8 +26,7 @@
         <select id="paradigmsId">
 
         </select>
-        <button onclick="checkForIntersections();">Check for intersections</button>
-        <p>(We'll paint circles that collide with text or are out of bounds blue)</p>
+        <button onclick="paintIntersections();">(for debugging) Click to paint circles (red: intersecting with axis, green: out of bounds, blue:intersecting with text)</button>
     </div>
     <svg id="svg">
 
@@ -48,13 +47,61 @@
         r1.top <= r2.bottom && r2.top <= r1.bottom);
     }
 
-    // log circles
+    function pointIsInsideRect(point, rect){
+        var isInside = (point.x > rect.left && point.x < rect.right
+            && point.y > rect.top && point.y < rect.bottom)
+        return isInside;
+    }
+
+    function elementIsNotCompletelyInsideOfAnotherelement(element, parentelement) {
+        var elementRect = element.node().getBoundingClientRect();
+        var parentElementRect = parentelement.node().getBoundingClientRect();
+
+        var upperLeft = {x:elementRect.left,y:elementRect.top};
+        var upperRight = {x:elementRect.right,y:elementRect.top};
+        var lowerLeft = {x:elementRect.left,y:elementRect.bottom};
+        var lowerRight = {x:elementRect.right,y:elementRect.bottom};
+
+        var elementIsCompletelyInside = (pointIsInsideRect(upperLeft, parentElementRect)
+            && pointIsInsideRect(upperRight, parentElementRect)
+            && pointIsInsideRect(lowerLeft, parentElementRect)
+            && pointIsInsideRect(lowerRight, parentElementRect));
+        return !elementIsCompletelyInside;
+    }
+
+    // Used to format strings
+    // http://stackoverflow.com/questions/2534803/string-format-in-javascript
+    function format (fmtstr) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        return fmtstr.replace(/\{(\d+)\}/g, function (match, index) {
+            return args[index];
+        });
+    }
+
     function logOverlappingCircle(d) {
         var cr = this.getBoundingClientRect();
 
-        console.log(
-                "Circle in (%d, %d, %d, %d) is obscured",
-                cr.left, cr.right, cr.top, cr.bottom
+        console.log(format(
+                "Circle for language {0} in (%d, %d, %d, %d) is colliding with some text",
+                d.name), cr.left, cr.right, cr.top, cr.bottom
+        );
+    }
+
+    function logOutsideCircle(d) {
+        var cr = this.getBoundingClientRect();
+
+        console.log(format(
+                "Circle for language {0} in (%d, %d, %d, %d) has a portion outside of the svg",
+                d.name), cr.left, cr.right, cr.top, cr.bottom
+        );
+    }
+
+    function logCircleOverlapWithAxis(d) {
+        var cr = this.getBoundingClientRect();
+
+        console.log(format(
+                "Circle for language {0} in (%d, %d, %d, %d) has a portion that collides with some axis",
+                d.name), cr.left, cr.right, cr.top, cr.bottom
         );
     }
 
@@ -80,9 +127,44 @@
         return joinFunction(sel1, sel2, pred);
     }
 
-    function checkForIntersections(){
+    // Block on the last "end" event (from http://stackoverflow.com/a/20773846)
+    function endall(transition, callback) {
+        if (transition.size() === 0) { callback() }
+        var n = 0;
+        transition.each(function() { ++n; })
+                .each("end", function() { if (!--n) callback.apply(this, arguments); });
+    }
+
+    // Call a callback, blocking on the end of all transitions
+    d3.transition.prototype.callOnEndAll = function(callback) {
+        return this.call(endall, callback);
+    };
+
+    function checkForIntersectionsBetweenTextAndCircles(shouldPaintIntersections){
         var intersections = d3.selectAll("circle").join(d3.selectAll(".labeltext"), elementsOverlap).each(logOverlappingCircle);
-        intersections.style("fill", "blue");
+        if (shouldPaintIntersections){
+            intersections.attr("fill", "blue");
+        }
+    }
+
+    function checkForCirclesOutOfBounds(shouldPaintIntersections){
+        var intersections = d3.selectAll("circle").join(d3.selectAll("#svg"), elementIsNotCompletelyInsideOfAnotherelement).each(logOutsideCircle);
+        if (shouldPaintIntersections){
+            intersections.attr("fill", "green");
+        }
+    }
+
+    function checkForCirclesIntersectingWithAxis(shouldPaintIntersections){
+        var intersections = d3.selectAll("circle").join(d3.selectAll(".axis"), elementsOverlap).each(logCircleOverlapWithAxis);
+        if (shouldPaintIntersections){
+            intersections.attr("fill", "red");
+        }
+    }
+
+    function paintIntersections(){
+        checkForIntersectionsBetweenTextAndCircles(true);
+        checkForCirclesOutOfBounds(true);
+        checkForCirclesIntersectingWithAxis(true);
     }
 
     function RunTests(){
@@ -169,6 +251,7 @@
             //Create X axis
             svg.append("g")
                     .attr("class", "xaxis")
+                    .attr("class", "axis")
                     .attr("transform", "translate(0," + (h - padding) + ")")
                     .call(xAxis);
         } else {
@@ -194,6 +277,7 @@
             //Create Y axis
             svg.append("g")
                     .attr("class", "yaxis")
+                    .attr("class", "axis")
                     .attr("transform", "translate(" + padding + ",0)")
                     .call(yAxis);
         } else {
@@ -276,7 +360,11 @@
                     .style('opacity', 0)
                     .transition()
                     .style('opacity', 1);
-        });
+        }).callOnEndAll(function() {
+            checkForIntersectionsBetweenTextAndCircles();
+            checkForCirclesOutOfBounds();
+            checkForCirclesIntersectingWithAxis();
+        });;
     }
 
     // Populate options - this will only run once
