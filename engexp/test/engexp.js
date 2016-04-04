@@ -54,5 +54,53 @@ describe("EngExp", function () {
         chai_1.expect(result[1]).to.be.equal("google.com/maps");
         chai_1.expect(result[2]).to.be.equal("google.com");
     });
+    it("should capture simple groups", function () {
+        var e = new engexp_1.default()
+            .startOfLine()
+            .then("http")
+            .maybe("s")
+            .then("://")
+            .maybe("www.")
+            .beginCapture()
+            .anythingBut("/")
+            .endCapture()
+            .anythingBut(" ")
+            .endOfLine()
+            .asRegExp();
+        var result = e.exec("https://www.google.com/maps");
+        chai_1.expect(result[1]).to.be.equal("google.com");
+    });
+    it("should capture unended groups", function () {
+        var e = new engexp_1.default()
+            .startOfLine()
+            .then("http")
+            .maybe("s")
+            .then("://")
+            .maybe("www.")
+            .beginCapture()
+            .anythingBut("/")
+            .anythingBut(" ")
+            .endOfLine()
+            .asRegExp();
+        var result = e.exec("https://www.google.com/maps");
+        chai_1.expect(result[1]).to.be.equal("google.com/maps");
+    });
+    it("should capture unended groups begin and end", function () {
+        var e = new engexp_1.default()
+            .beginCapture()
+            .startOfLine()
+            .then("http")
+            .maybe("s")
+            .then("://")
+            .maybe("www.")
+            .beginCapture()
+            .anythingBut("/")
+            .anythingBut(" ")
+            .endOfLine()
+            .asRegExp();
+        var result = e.exec("https://www.google.com/maps");
+        chai_1.expect(result[1]).to.be.equal("https://www.google.com/maps");
+        chai_1.expect(result[2]).to.be.equal("google.com/maps");
+    });
 });
 //# sourceMappingURL=engexp.js.map

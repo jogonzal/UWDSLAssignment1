@@ -5,6 +5,7 @@ var EngExp = (function () {
         this.suffixes = "";
         this.flags = "m";
         this.pattern = "";
+        this.numGroups = 0;
     }
     EngExp.sanitize = function (s) {
         if (s instanceof EngExp)
@@ -13,6 +14,10 @@ var EngExp = (function () {
             return s.replace(/([\].|*?+(){}^$\\:=[])/g, "\\$&");
     };
     EngExp.prototype.asRegExp = function () {
+        // For every missing end of capture group, close it
+        for (var i = 0; i < this.numGroups; i++) {
+            this.pattern += ")";
+        }
         return new RegExp(this.prefixes + this.pattern + this.suffixes, this.flags);
     };
     EngExp.prototype.match = function (literal) {
@@ -76,10 +81,12 @@ var EngExp = (function () {
     };
     EngExp.prototype.beginCapture = function () {
         this.pattern += "(";
+        this.numGroups += 1; // increase counter
         return this;
     };
     EngExp.prototype.endCapture = function () {
         this.pattern += ")";
+        this.numGroups -= 1; // decrease counter
         return this;
     };
     EngExp.prototype.toString = function () {

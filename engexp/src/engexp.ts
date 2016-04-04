@@ -3,6 +3,7 @@ export default class EngExp {
     private suffixes: string = "";
     private flags: string = "m";
     private pattern: string = "";
+    private numGroups = 0;
 
     private static sanitize(s: string | EngExp): string | EngExp {
         if (s instanceof EngExp)
@@ -12,6 +13,10 @@ export default class EngExp {
     }
 
     asRegExp(): RegExp {
+        // For every missing end of capture group, close it
+        for(var i = 0; i < this.numGroups; i++){
+            this.pattern += ")";
+        }
         return new RegExp(this.prefixes + this.pattern + this.suffixes, this.flags);
     }
 
@@ -89,11 +94,13 @@ export default class EngExp {
 
     beginCapture(): EngExp {
         this.pattern += "(";
+        this.numGroups+=1; // increase counter
         return this;
     }
 
     endCapture(): EngExp {
         this.pattern += ")";
+        this.numGroups-=1; // decrease counter
         return this;
     }
 

@@ -61,4 +61,55 @@ describe("EngExp", () => {
         expect(result[1]).to.be.equal("google.com/maps");
         expect(result[2]).to.be.equal("google.com");
     });
+
+    it("should capture simple groups", () => {
+        let e = new EngExp()
+            .startOfLine()
+            .then("http")
+            .maybe("s")
+            .then("://")
+            .maybe("www.")
+            .beginCapture()
+            .anythingBut("/")
+            .endCapture()
+            .anythingBut(" ")
+            .endOfLine()
+            .asRegExp();
+        let result = e.exec("https://www.google.com/maps");
+        expect(result[1]).to.be.equal("google.com");
+    });
+
+    it("should capture unended groups", () => {
+        let e = new EngExp()
+            .startOfLine()
+            .then("http")
+            .maybe("s")
+            .then("://")
+            .maybe("www.")
+            .beginCapture()
+            .anythingBut("/")
+            .anythingBut(" ")
+            .endOfLine()
+            .asRegExp();
+        let result = e.exec("https://www.google.com/maps");
+        expect(result[1]).to.be.equal("google.com/maps");
+    });
+
+    it("should capture unended groups begin and end", () => {
+        let e = new EngExp()
+            .beginCapture()
+            .startOfLine()
+            .then("http")
+            .maybe("s")
+            .then("://")
+            .maybe("www.")
+            .beginCapture()
+            .anythingBut("/")
+            .anythingBut(" ")
+            .endOfLine()
+            .asRegExp();
+        let result = e.exec("https://www.google.com/maps");
+        expect(result[1]).to.be.equal("https://www.google.com/maps");
+        expect(result[2]).to.be.equal("google.com/maps");
+    });
 });
