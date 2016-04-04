@@ -250,8 +250,7 @@
 
             //Create X axis
             svg.append("g")
-                    .attr("class", "xaxis")
-                    .attr("class", "axis")
+                    .attr("class", "xaxis axis")
                     .attr("transform", "translate(0," + (h - padding) + ")")
                     .call(xAxis);
         } else {
@@ -276,8 +275,7 @@
 
             //Create Y axis
             svg.append("g")
-                    .attr("class", "yaxis")
-                    .attr("class", "axis")
+                    .attr("class", "yaxis axis")
                     .attr("transform", "translate(" + padding + ",0)")
                     .call(yAxis);
         } else {
